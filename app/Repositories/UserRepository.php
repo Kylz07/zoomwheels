@@ -1,6 +1,9 @@
 <?php
 namespace App\Repositories;
 
+use App\Core\Interfaces\DataRepositoryInterface;
+use App\Core\Interfaces\iDBFuncs;
+
 class UserRepository implements DataRepositoryInterface {
     private $db;
 

@@ -1,6 +1,10 @@
 <?php
 namespace App\Controllers;
 
+use App\Core\Interfaces\DataRepositoryInterface;
+use App\Core\Interfaces\RequestInterface;
+use App\Core\Response;
+
 class RentalController {
     private $rentalRepository;
     private $request;

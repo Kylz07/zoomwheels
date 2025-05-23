@@ -2,6 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Core\Interfaces\DataRepositoryInterface;
+use App\Core\Interfaces\RequestInterface;
+use App\Core\Response;
+
 class UserController {
     private $userRepository;
     private $request;

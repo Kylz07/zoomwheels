@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace App\Core;
 
+use App\Core\Interfaces\iDBFuncs;
+
 class DBORM implements iDBFuncs{
 
     private object $db;

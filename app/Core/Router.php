@@ -1,6 +1,9 @@
 <?php
 namespace App\Core;
 
+use App\Core\Interfaces\RequestInterface;
+use App\Core\Response;
+
 class Router {
     private $request;
     private $routeMatcher;

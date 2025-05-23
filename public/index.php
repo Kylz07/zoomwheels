@@ -20,10 +20,6 @@ $request = new Request();
 // Initialize the user controller with dependencies
 $controller = new UserController($userRepository, $request);
 
-// Initialize the student repository and controller
-$studentRepository = new StudentRepository($dborm);
-$studentController = new StudentController($studentRepository, $request);
-
 // Initialize the rental repository and controller with DBORM
 $rentalRepository = new RentalRepository($dborm);
 $rentalController = new RentalController($rentalRepository, $request);
