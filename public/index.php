@@ -1,5 +1,12 @@
 <?php
-require_once 'init.php';
+use App\Core\DBORM;
+use App\Repositories\UserRepository;
+use App\Repositories\RentalRepository;
+use App\Core\Request;
+use App\Controllers\UserController;
+use App\Controllers\RentalController;
+use App\Core\Router;
+use App\Core\RouteMatcher;
 
 // Initialize the DBORM connection for repositories using iDBFuncs
 $dborm = new DBORM('mysql:host=localhost;dbname=rest_api','root','lingco.0576');

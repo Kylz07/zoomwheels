@@ -1,4 +1,6 @@
 <?php
+namespace App\Core;
+
 class Response {
     private $statusCode;
     private $body;

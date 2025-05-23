@@ -1,4 +1,7 @@
 <?php
+use App\Controllers\UserController;
+use App\Controllers\RentalController;
+
 return [
     // User routes
     ['method' => 'GET', 'path' => '/users', 'handler' => function () use ($controller) {

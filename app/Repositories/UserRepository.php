@@ -1,4 +1,6 @@
 <?php
+namespace App\Repositories;
+
 class UserRepository implements DataRepositoryInterface {
     private $db;
 

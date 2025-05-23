@@ -1,4 +1,6 @@
 <?php
+namespace App\Core;
+
 class Request implements RequestInterface {
     public function getMethod(): string {
         return $_SERVER['REQUEST_METHOD'];

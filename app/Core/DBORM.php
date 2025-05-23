@@ -1,6 +1,8 @@
 <?php
 declare(strict_types = 1);
 
+namespace App\Core;
+
 class DBORM implements iDBFuncs{
 
     private object $db;

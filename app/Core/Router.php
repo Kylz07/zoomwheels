@@ -1,4 +1,6 @@
 <?php
+namespace App\Core;
+
 class Router {
     private $request;
     private $routeMatcher;

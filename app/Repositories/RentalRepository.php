@@ -1,4 +1,6 @@
 <?php
+namespace App\Repositories;
+
 class RentalRepository implements DataRepositoryInterface {
     private $db;
 

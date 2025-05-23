@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Controllers;
+
 class UserController {
     private $userRepository;
     private $request;
