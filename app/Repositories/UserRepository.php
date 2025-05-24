@@ -28,7 +28,7 @@ class UserRepository implements DataRepositoryInterface {
 
         if ($username && $password && $email && $first_name && $last_name) {
             return $this->db->table('users')->insert([
-                $username, $password, $email, $first_name, $last_name
+                null, $username, $password, $email, $first_name, $last_name
             ]);
         } else {
             throw new Exception("Missing required fields for user creation.");

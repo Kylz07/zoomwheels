@@ -15,43 +15,64 @@ class AuthController {
         $this->request = $request;
     }
 
-    public function showRegisterForm($error = '', $success = '') {
-        // Render the registration view with error/success messages
-        include __DIR__ . '/../../public/register.php';
+    public function showRegisterForm($error = '', $success = '', $status = 200) {
+        if (!isset($error)) $error = '';
+        if (!isset($success)) $success = '';
+        ob_start();
+        include __DIR__ . '/../Views/users/register.php';
+        $html = ob_get_clean();
+        return new Response($status, $html);
     }
 
     public function register() {
         $data = $this->request->getBody();
         $error = '';
         $success = '';
-        // Server-side validation
-        if (empty($data['username']) || empty($data['email']) || empty($data['password']) || empty($data['confirm_password'])) {
+        $status = 200;
+        // Sanitize and validate input
+        $username = isset($data['username']) ? trim($data['username']) : '';
+        $email = isset($data['email']) ? filter_var(trim($data['email']), FILTER_SANITIZE_EMAIL) : '';
+        $password = isset($data['password']) ? $data['password'] : '';
+        $confirm_password = isset($data['confirm_password']) ? $data['confirm_password'] : '';
+        $first_name = isset($data['first_name']) ? trim($data['first_name']) : '';
+        $last_name = isset($data['last_name']) ? trim($data['last_name']) : '';
+
+        // Validation
+        if (!$username || !$email || !$password || !$confirm_password || !$first_name || !$last_name) {
             $error = 'All fields are required.';
-        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $status = 400;
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error = 'Invalid email format.';
-        } elseif (strlen($data['password']) < 6) {
+            $status = 400;
+        } elseif (strlen($password) < 6) {
             $error = 'Password must be at least 6 characters.';
-        } elseif ($data['password'] !== $data['confirm_password']) {
+            $status = 400;
+        } elseif ($password !== $confirm_password) {
             $error = 'Passwords do not match.';
+            $status = 400;
         }
         if ($error) {
-            $this->showRegisterForm($error);
-            return;
+            // Error takes priority, no success message
+            return $this->showRegisterForm($error, '', $status);
         }
         // Hash password
-        $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         try {
             $this->userRepository->create([
-                'username' => $data['username'],
+                'username' => $username,
                 'password' => $hashedPassword,
-                'email' => $data['email'],
-                'first_name' => $data['first_name'] ?? '',
-                'last_name' => $data['last_name'] ?? ''
+                'email' => $email,
+                'first_name' => $first_name,
+                'last_name' => $last_name
             ]);
             $success = 'Registration successful!';
-            $this->showRegisterForm('', $success);
+            $status = 201;
+            return $this->showRegisterForm('', $success, $status);
         } catch (\Exception $e) {
-            $this->showRegisterForm('Registration failed: ' . $e->getMessage());
+            error_log('Registration error: ' . $e->getMessage());
+            $error = 'Registration failed. Please try again later.';
+            $status = 500;
+            return $this->showRegisterForm($error, '', $status);
         }
     }
 }

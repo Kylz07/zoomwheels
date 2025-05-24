@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace App\Core;
 
+use PDO;
+use PDOException;
 use App\Core\Interfaces\iDBFuncs;
 
 class DBORM implements iDBFuncs{
@@ -198,7 +200,7 @@ class DBORM implements iDBFuncs{
                     case 'integer': $pdoType = PDO::PARAM_INT; break;
                     case 'double': $pdoType = PDO::PARAM_STR; break;
                 }
-                $dbStatement->bindParam($valueCounter + 1, $this->valueBag[$valueCounter], $pdoType);
+                $dbStatement->bindValue($valueCounter + 1, $this->valueBag[$valueCounter]);
                 $valueCounter++;
             }
     

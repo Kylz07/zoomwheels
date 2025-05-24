@@ -1,6 +1,7 @@
 <?php
 use App\Controllers\UserController;
 use App\Controllers\RentalController;
+use App\Controllers\AuthController;
 
 return [
     // User routes
@@ -34,5 +35,12 @@ return [
     }],
     ['method' => 'DELETE', 'path' => '/rentals/{id}', 'handler' => function ($id) use ($rentalController) {
         return $rentalController->deleteRental($id);
+    }],
+    // Registration routes
+    ['method' => 'GET', 'path' => '/register', 'handler' => function () use ($authController) {
+        return $authController->showRegisterForm();
+    }],
+    ['method' => 'POST', 'path' => '/register', 'handler' => function () use ($authController) {
+        return $authController->register();
     }],
 ];
