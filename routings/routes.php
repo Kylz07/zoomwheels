@@ -35,12 +35,40 @@ return [
     }],
     ['method' => 'DELETE', 'path' => '/rentals/{id}', 'handler' => function ($id) use ($rentalController) {
         return $rentalController->deleteRental($id);
-    }],
-    // Registration routes
+    }],    // Registration routes
     ['method' => 'GET', 'path' => '/register', 'handler' => function () use ($authController) {
         return $authController->showRegisterForm();
     }],
     ['method' => 'POST', 'path' => '/register', 'handler' => function () use ($authController) {
         return $authController->register();
+    }],
+    
+    // Login routes
+    ['method' => 'GET', 'path' => '/login', 'handler' => function () use ($authController) {
+        return $authController->showLoginForm();
+    }],
+    ['method' => 'POST', 'path' => '/login', 'handler' => function () use ($authController) {
+        return $authController->login();
+    }],
+    
+    // Dashboard route
+    ['method' => 'GET', 'path' => '/dashboard', 'handler' => function () use ($authController) {
+        return $authController->showDashboard();
+    }],
+    
+    // Logout route
+    ['method' => 'GET', 'path' => '/logout', 'handler' => function () use ($authController) {
+        return $authController->logout();
+    }],
+    ['method' => 'POST', 'path' => '/logout', 'handler' => function () use ($authController) {
+        return $authController->logout();
+    }],
+    
+    // Home/Root route - redirect to login
+    ['method' => 'GET', 'path' => '/', 'handler' => function () use ($authController) {
+        return $authController->showLoginForm();
+    }],
+    ['method' => 'GET', 'path' => '', 'handler' => function () use ($authController) {
+        return $authController->showLoginForm();
     }],
 ];

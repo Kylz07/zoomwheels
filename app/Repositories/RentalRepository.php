@@ -9,14 +9,12 @@ class RentalRepository implements DataRepositoryInterface {
 
     public function __construct(iDBFuncs $db) {
         $this->db = $db;
-    }
-
-    public function getAll() {
-        return $this->db->table('rentals')->select()->getAll();
+    }    public function getAll() {
+        return $this->db->table('rentals')->select()->from('rentals')->getAll();
     }
 
     public function getById($id) {
-        return $this->db->table('rentals')->select()->where('rental_id', $id)->get();
+        return $this->db->table('rentals')->select()->from('rentals')->where('rental_id', $id)->get();
     }
 
     public function create($data) {
@@ -24,11 +22,9 @@ class RentalRepository implements DataRepositoryInterface {
         $car_model = $data['car_model'] ?? null;
         $car_license_plate = $data['car_license_plate'] ?? null;
         $car_daily_rate = $data['car_daily_rate'] ?? null;
-        $rental_status = $data['rental_status'] ?? 'available';
-
-        if ($car_brand && $car_model && $car_license_plate && $car_daily_rate) {
+        $rental_status = $data['rental_status'] ?? 'available';        if ($car_brand && $car_model && $car_license_plate && $car_daily_rate) {
             return $this->db->table('rentals')->insert([
-                $car_brand, $car_model, $car_license_plate, $car_daily_rate, $rental_status
+                null, $car_brand, $car_model, $car_license_plate, $car_daily_rate, $rental_status
             ]);
         } else {
             throw new Exception("Missing required fields for rental creation.");

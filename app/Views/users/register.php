@@ -1,35 +1,57 @@
-<!-- Registration View (PHP only, no CSS or JS) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Zoomwheels</title>
 </head>
 <body>
-<div>
-    <h2>Register</h2>
-    <?php if (!empty($error)): ?>
-        <div style="color: #b00; margin-bottom: 10px;"> <?php echo $error; ?> </div>
-    <?php endif; ?>
-    <?php if (!empty($success)): ?>
-        <div style="color: #080; margin-bottom: 10px;"> <?php echo $success; ?> </div>
-    <?php endif; ?>
-    <form method="post" action="/register">
-        <label for="username">Username</label><br>
-        <input type="text" id="username" name="username" required><br>
-        <label for="email">Email</label><br>
-        <input type="email" id="email" name="email" required><br>
-        <label for="first_name">First Name</label><br>
-        <input type="text" id="first_name" name="first_name" required><br>
-        <label for="last_name">Last Name</label><br>
-        <input type="text" id="last_name" name="last_name" required><br>
-        <label for="password">Password</label><br>
-        <input type="password" id="password" name="password" required><br>
-        <label for="confirm_password">Confirm Password</label><br>
-        <input type="password" id="confirm_password" name="confirm_password" required><br>
-        <button type="submit">Register</button>
-    </form>
-</div>
+    <h2>Register for Zoomwheels</h2>        
+        <?php if (!empty($error)): ?>
+            <p><strong>Error:</strong> <?php echo htmlspecialchars($error); ?></p>
+        <?php endif; ?>
+        
+        <?php if (!empty($success)): ?>
+            <p><strong>Success:</strong> <?php echo htmlspecialchars($success); ?></p>
+        <?php endif; ?>
+        
+        <form method="post" action="/register">
+            <p>
+                <label for="username">Username:</label><br>
+                <input type="text" id="username" name="username" required>
+            </p>
+            
+            <p>
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" name="email" required>
+            </p>
+            
+            <p>
+                <label for="first_name">First Name:</label><br>
+                <input type="text" id="first_name" name="first_name" required>
+            </p>
+            
+            <p>
+                <label for="last_name">Last Name:</label><br>
+                <input type="text" id="last_name" name="last_name" required>
+            </p>
+            
+            <p>
+                <label for="password">Password:</label><br>
+                <input type="password" id="password" name="password" required>
+            </p>
+            
+            <p>
+                <label for="confirm_password">Confirm Password:</label><br>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </p>
+            
+            <p>
+                <button type="submit">Register</button>
+            </p>
+        </form>
+          <p>Already have an account? <a href="/login">Login here</a></p>
+    </div>
 </body>
 </html>
 
