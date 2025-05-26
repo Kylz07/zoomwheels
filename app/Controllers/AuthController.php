@@ -27,27 +27,19 @@ class AuthController {
     }
 
     public function register() {
-        $data = $this->request->getBody();
+        $data = $this->request->getBody();        
         $error = '';
         $success = '';
         $status = 200;
 
         // Sanitize and validate input
         $username = isset($data['username']) ? trim($data['username']) : '';
-        $email = isset($data['email']) ? filter_var(trim($data['email']), FILTER_SANITIZE_EMAIL) : '';
         $password = isset($data['password']) ? $data['password'] : '';
         $confirm_password = isset($data['confirm_password']) ? $data['confirm_password'] : '';
         $first_name = isset($data['first_name']) ? trim($data['first_name']) : '';
         $last_name = isset($data['last_name']) ? trim($data['last_name']) : '';
 
-        // Remove duplicate required fields validation (handled in UserRepository)
-        // Validation only for email format, password length, and password match
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $error = 'Invalid email format.';
-            $status = 400;
-            return $this->showRegisterForm($error, '', $status);
-        }
-
+        // Validation for password length and password match
         if (strlen($password) < 3) {
             $error = 'Password must be at least 3 characters.';
             $status = 400;
@@ -61,12 +53,11 @@ class AuthController {
         }
 
         // Hash and insert
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);        
         try {
             $this->userRepository->create([
                 'username' => $username,
                 'password' => $hashedPassword,
-                'email' => $email,
                 'first_name' => $first_name,
                 'last_name' => $last_name
             ]);
@@ -152,11 +143,8 @@ class AuthController {
         // Check if user is logged in
         if (!$this->session->isLoggedIn()) {
             return $this->redirectToLogin('Please log in to access the dashboard.');
-        }
-
-        $user = [
+        }        $user = [
             'username' => $this->session->getUsername(),
-            'email' => $this->session->get('email'),
             'first_name' => $this->session->get('first_name'),
             'last_name' => $this->session->get('last_name')
         ];

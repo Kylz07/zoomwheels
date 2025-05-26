@@ -9,7 +9,7 @@
     <h2>Login to Zoomwheels</h2>
     
     <?php if (!empty($error)): ?>
-        <p><strong>Error:</strong> <?php echo htmlspecialchars($error); ?></p>
+        <p><?php echo htmlspecialchars($error); ?></p>
     <?php endif; ?>
     
     <?php if (!empty($success)): ?>
@@ -17,21 +17,13 @@
     <?php endif; ?>
     
     <form method="post" action="/login">
-        <p>
-            <label for="username">Username:</label><br>
-            <input type="text" id="username" name="username" required autofocus>
-        </p>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required autofocus><br>
         
-        <p>
-            <label for="password">Password:</label><br>
-            <input type="password" id="password" name="password" required>
-        </p>
-        
-        <p>
-            <button type="submit">Login</button>
-        </p>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Login</button>
+        <button type="button" onclick="window.location.href='/register'">Register</button>
     </form>
-    
-    <p>Don't have an account? <a href="/register">Register here</a></p>
 </body>
 </html>
