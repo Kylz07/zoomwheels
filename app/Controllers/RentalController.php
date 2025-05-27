@@ -4,41 +4,53 @@ namespace App\Controllers;
 use App\Core\Interfaces\DataRepositoryInterface;
 use App\Core\Interfaces\RequestInterface;
 use App\Core\Response;
+use App\Services\JwtService;
+use App\Exceptions\InvalidCredentialsException;
+use App\Traits\JwtAuthenticationTrait;
 
 class RentalController {
+    use JwtAuthenticationTrait;
+    
     private $rentalRepository;
     private $request;
+    private $jwtService;
 
-    public function __construct(DataRepositoryInterface $rentalRepository, RequestInterface $request) {
+    public function __construct(DataRepositoryInterface $rentalRepository, RequestInterface $request, JwtService $jwtService) {
         $this->rentalRepository = $rentalRepository;
-        $this->request = $request;
+        $this->request = $request;        $this->jwtService = $jwtService;
     }
 
     public function getAllRentals() {
+        $auth = $this->requireJwtAuth();
+        if ($auth) return $auth;
         return new Response(200, json_encode($this->rentalRepository->getAll()));
     }
-
     public function getRentalById($id) {
+        $auth = $this->requireJwtAuth();
+        if ($auth) return $auth;
         $rental = $this->rentalRepository->getById($id);
         if (empty($rental)) {
             return new Response(404, json_encode(['error' => 'Rental not found']));
         }
         return new Response(200, json_encode($rental[0]));
     }
-
     public function createRental() {
+        $auth = $this->requireJwtAuth();
+        if ($auth) return $auth;
         $data = $this->request->getBody();
         $this->rentalRepository->create($data);
         return new Response(201, json_encode(['message' => 'Rental created']));
     }
-
     public function updateRental($id) {
+        $auth = $this->requireJwtAuth();
+        if ($auth) return $auth;
         $data = $this->request->getBody();
         $this->rentalRepository->update($id, $data);
         return new Response(200, json_encode(['message' => 'Rental updated']));
     }
-
     public function deleteRental($id) {
+        $auth = $this->requireJwtAuth();
+        if ($auth) return $auth;
         $this->rentalRepository->delete($id);
         return new Response(204, '');
     }

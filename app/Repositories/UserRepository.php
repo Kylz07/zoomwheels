@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Core\Interfaces\DataRepositoryInterface;
 use App\Core\Interfaces\iDBFuncs;
+use App\Exceptions\UserAlreadyExistsException;
 
 class UserRepository implements DataRepositoryInterface {
     private $db;
@@ -21,7 +22,9 @@ class UserRepository implements DataRepositoryInterface {
         // As a workaround, we'll return an empty array for now
         // This needs to be fixed in DBORM or use raw SQL
         return [];
-    }    public function create($data) {
+    }    
+    
+    public function create($data) {
         $username = $data['username'] ?? null;
         $password = $data['password'] ?? null;
         $first_name = $data['first_name'] ?? null;
@@ -29,13 +32,16 @@ class UserRepository implements DataRepositoryInterface {
         
         if (!$username || !$password || !$first_name || !$last_name) {
             throw new \Exception("Please fill in all required fields.");
-        }        // Check for duplicate username or existing user (same username, first_name, last_name)
+        }        
+        
+        // Check for duplicate username or existing user (same username, first_name, last_name)
         $existingUser = $this->findByUsername($username);
         if ($existingUser) {
             if ($existingUser['first_name'] === $first_name && $existingUser['last_name'] === $last_name) {
-                throw new \Exception("User already exists.");
-            } else {
-                throw new \Exception("Username already exists.");
+                throw new UserAlreadyExistsException("User already exists.");
+            } 
+            else {
+                throw new UserAlreadyExistsException("Username already exists.");
             }
         }
 
@@ -50,7 +56,9 @@ class UserRepository implements DataRepositoryInterface {
         }
         
         return $result;
-    }    public function update($id, $data) {
+    }    
+    
+    public function update($id, $data) {
         $fields = [];
         if (isset($data['username'])) $fields['username'] = $data['username'];
         if (isset($data['password'])) $fields['password'] = $data['password'];
@@ -67,7 +75,9 @@ class UserRepository implements DataRepositoryInterface {
 
     public function delete($id) {
         return $this->db->table('users')->where('user_id', $id)->delete();
-    }    public function findByUsername($username) {
+    }    
+    
+    public function findByUsername($username) {
         // Since DBORM has a bug with _runGetQuery and namespaced classes,
         // we'll use a workaround with raw SQL through a new DBORM instance
         try {

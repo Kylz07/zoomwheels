@@ -55,13 +55,17 @@ return [
     ['method' => 'GET', 'path' => '/dashboard', 'handler' => function () use ($authController) {
         return $authController->showDashboard();
     }],
-    
-    // Logout route
+      // Logout route
     ['method' => 'GET', 'path' => '/logout', 'handler' => function () use ($authController) {
         return $authController->logout();
     }],
     ['method' => 'POST', 'path' => '/logout', 'handler' => function () use ($authController) {
         return $authController->logout();
+    }],
+    
+    // Auth check route
+    ['method' => 'GET', 'path' => '/auth/check', 'handler' => function () use ($authController) {
+        return $authController->checkAuth();
     }],
     
     // Home/Root route - redirect to login
