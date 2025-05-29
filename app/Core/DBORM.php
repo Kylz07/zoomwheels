@@ -70,6 +70,7 @@ class DBORM implements iDBFuncs{
     private function _runGetQuery($getMethod): array{
         $this->sql .= ';';
         $dbStatement = $this->db->prepare($this->sql);
+        $recordset = [];
         
         try {
             if ($this->valueBag) {

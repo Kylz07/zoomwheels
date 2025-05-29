@@ -24,7 +24,14 @@ return [
     ['method' => 'GET', 'path' => '/rentals', 'handler' => function () use ($rentalController) {
         return $rentalController->getAllRentals();
     }],
-    ['method' => 'GET', 'path' => '/rentals/{id}', 'handler' => function ($id) use ($rentalController) {
+    // Place /rentals/create routes BEFORE /rentals/{id}
+    ['method' => 'GET', 'path' => '/rentals/create', 'handler' => function () use ($rentalController) {
+        return $rentalController->showCreateForm();
+    }],
+    ['method' => 'POST', 'path' => '/rentals/create', 'handler' => function () use ($rentalController) {
+        return $rentalController->processCreate();
+    }],
+    ['method' => 'GET', 'path' => '/rentals/{id:\d+}', 'handler' => function ($id) use ($rentalController) {
         return $rentalController->getRentalById($id);
     }],
     ['method' => 'POST', 'path' => '/rentals', 'handler' => function () use ($rentalController) {
@@ -35,7 +42,8 @@ return [
     }],
     ['method' => 'DELETE', 'path' => '/rentals/{id}', 'handler' => function ($id) use ($rentalController) {
         return $rentalController->deleteRental($id);
-    }],    // Registration routes
+    }],
+    // Registration routes
     ['method' => 'GET', 'path' => '/register', 'handler' => function () use ($authController) {
         return $authController->showRegisterForm();
     }],
@@ -74,5 +82,11 @@ return [
     }],
     ['method' => 'GET', 'path' => '', 'handler' => function () use ($authController) {
         return $authController->showLoginForm();
+    }],
+    // Catch-all 404 route for undefined paths
+    ['method' => 'GET', 'path' => '/{any}', 'handler' => function () {
+        http_response_code(404);
+        echo '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>404 - Page Not Found</h1><p>The page you are looking for does not exist.</p></body></html>';
+        exit;
     }],
 ];

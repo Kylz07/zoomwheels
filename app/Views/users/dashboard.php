@@ -20,10 +20,7 @@
     
     <h2>Quick Actions</h2>
     <ul>
-        <li><a href="/rentals">🚗 View Vehicle Rentals</a></li>
-        <li><a href="/profile">👤 Edit Profile Settings</a></li>
-        <li><a href="/history">📊 View Rental History</a></li>
-        <li><a href="/billing">💳 Manage Billing</a></li>
+        <li><a href="/rentals">🚗 Manage Rentals</a></li>
     </ul>
     
     <hr>

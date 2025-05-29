@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\DBORM;
+use App\Core\Database; // Added: Import the Database class
 use App\Repositories\UserRepository;
 use App\Repositories\RentalRepository;
 use App\Core\Request;
@@ -15,8 +16,18 @@ use App\Core\RouteMatcher;
 
 
 
+// Database Configuration
+$dbHost = 'localhost';
+$dbName = 'zoomwheels';
+$dbUser = 'root';
+$dbPass = 'lingco.0576'; // Your actual password
+
 // Initialize the DBORM connection for repositories using iDBFuncs
-$dborm = new DBORM('mysql:host=localhost;dbname=zoomwheels','root','lingco.0576');
+$dbormDsn = "mysql:host={$dbHost};dbname={$dbName}";
+$dborm = new DBORM($dbormDsn, $dbUser, $dbPass);
+
+// Initialize the Database connection for direct queries
+$database = new Database($dbHost, $dbUser, $dbPass, $dbName);
 
 // Initialize the user repository with DBORM
 $userRepository = new UserRepository($dborm);
@@ -30,8 +41,8 @@ $jwtService = new JwtService($userRepository);
 // Initialize the user controller with dependencies
 $controller = new UserController($userRepository, $request, $jwtService);
 
-// Initialize the rental repository and controller with DBORM
-$rentalRepository = new RentalRepository($dborm);
+// Initialize the rental repository and controller
+$rentalRepository = new RentalRepository($dborm, $database); // Updated: Pass both DBORM and Database instances
 $rentalController = new RentalController($rentalRepository, $request, $jwtService);
 
 // Initialize the auth controller
