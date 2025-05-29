@@ -95,4 +95,12 @@ return [
     ['method' => 'GET', 'path' => '/rentals-dashboard', 'handler' => function () use ($rentalController) {
         return $rentalController->showRentalsPage();
     }],
+    // --- Delete routes ---
+    ['method' => 'GET', 'path' => '/rentals/delete/{id}', 'handler' => function ($id) use ($rentalController) {
+        return $rentalController->showDeleteForm($id);
+    }],
+    ['method' => 'POST', 'path' => '/rentals/delete/{id}', 'handler' => function ($id) use ($rentalController) {
+        return $rentalController->processDelete($id);
+    }],
+    // --- End Delete routes ---
 ];

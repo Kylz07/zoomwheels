@@ -30,11 +30,10 @@
             <option value="rented" <?php if ($rental['rental_status'] === 'rented') echo 'selected'; ?>>Rented</option>
             <option value="out of service" <?php if ($rental['rental_status'] === 'out of service') echo 'selected'; ?>>Out of Service</option>
         </select><br><br>
-        <button type="submit">Update Rental</button>
+        <button type="submit" style="color:white;background-color:green;">Update</button>
+        <a href="/rentals" style="margin-left:10px;"><button type="button" style="color:black;background-color:lightgray;">Back</button></a>
     </form>
     <br>
-    <form action="/rentals" method="get" style="display:inline;">
-        <button type="submit">Back to Rentals Dashboard</button>
-    </form>
+
 </body>
 </html>

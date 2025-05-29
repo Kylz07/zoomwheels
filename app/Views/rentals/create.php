@@ -8,10 +8,10 @@
 <body>
     <h1>Create New Rental</h1>
     <?php if (!empty($error)): ?>
-        <p style="color:red;"><strong><?php echo htmlspecialchars($error); ?></strong></p>
+        <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
     <?php endif; ?>
     <?php if (!empty($success)): ?>
-        <p style="color:green;"><strong><?php echo htmlspecialchars($success); ?></strong></p>
+        <p style="color:green;"><?php echo htmlspecialchars($success); ?></p>
     <?php endif; ?>
     <form action="/rentals/create" method="post">
         <label for="car_brand">Car Brand:</label>

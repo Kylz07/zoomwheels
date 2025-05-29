@@ -138,13 +138,16 @@ class RentalController {
         } else {
             try {
                 $this->rentalRepository->create($data);
-                // Redirect to rentals dashboard after successful creation
-                return new Response(302, '', ['Location' => '/rentals']);
+                $success = 'Rental created successfully.';
+                // Clear form data after successful creation by passing empty data to the view
+                // For now, let's clear the data and show the success message on the same page.
+                $data = []; // This will clear the form if the view uses $data to populate fields.
             } catch (\Exception $e) {
-                $error = $e->getMessage();
+                $error = "Failed to create rental: " . $e->getMessage();
             }
         }
         ob_start();
+        // Pass $success, $error and potentially cleared $data to the view
         include __DIR__ . '/../Views/rentals/create.php';
         $html = ob_get_clean();
         return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
@@ -216,5 +219,43 @@ class RentalController {
         include __DIR__ . '/../Views/rentals/edit.php';
         $html = ob_get_clean();
         return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    public function showDeleteForm($id) {
+        $auth = $this->requireJwtAuthCookieOnly();
+        if ($auth) return $auth;
+        $error = '';
+        $rental = null;
+        $result = $this->rentalRepository->getById($id);
+        if (empty($result)) {
+            return new Response(404, 'Rental not found', ['Content-Type' => 'text/plain; charset=UTF-8']);
+        } else {
+            $rental = $result[0];
+        }
+        ob_start();
+        include __DIR__ . '/../Views/rentals/delete.php';
+        $html = ob_get_clean();
+        return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    public function processDelete($id) {
+        $auth = $this->requireJwtAuth();
+        if ($auth) return $auth;
+        $error = '';
+        $result = $this->rentalRepository->getById($id);
+        if (empty($result)) {
+            return new Response(404, 'Rental not found', ['Content-Type' => 'text/plain; charset=UTF-8']);
+        }
+        try {
+            $this->rentalRepository->delete($id); // Hard delete
+            return new Response(302, '', ['Location' => '/rentals']);
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+            $rental = $result[0];
+            ob_start();
+            include __DIR__ . '/../Views/rentals/delete.php';
+            $html = ob_get_clean();
+            return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
+        }
     }
 }

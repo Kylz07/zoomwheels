@@ -6,10 +6,10 @@
     <title>Manage Rentals - Zoomwheels</title>
 </head>
 <body>
-    <h1>Manage Rentals</h1>
+    <h1>Zoomwheels</h1>
     <p><strong>Welcome, <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>!</strong></p>
     <form action="/rentals/create" method="get" style="display:inline;">
-        <button type="submit">Create New Rental</button>
+        <button type="submit" style="color:white;background-color:green;">+ Create New</button>
     </form>
     <br><br>
     <table border="1" cellpadding="5" id="rentals-table">
@@ -36,7 +36,10 @@
                         <td><?php echo htmlspecialchars($rental['rental_status']); ?></td>
                         <td>
                             <a href="/rentals/edit/<?php echo htmlspecialchars($rental['rental_id']); ?>">
-                                <button type="button">Edit</button>
+                                <button type="button" style="color:white;background-color:blue;">Edit</button>
+                            </a>
+                            <a href="/rentals/delete/<?php echo htmlspecialchars($rental['rental_id']); ?>">
+                                <button type="button" style="color:white;background-color:red;">Delete</button>
                             </a>
                         </td>
                     </tr>
