@@ -43,13 +43,22 @@
         </tbody>
     </table>
     <br>
-    <!-- Pagination Placeholder -->
-    <div>
-        <button disabled>Previous</button>
-        <span>Page 1</span>
-        <button disabled>Next</button>
+    <!-- Pagination Controls -->
+    <?php if (isset($totalPages) && $totalPages > 1): ?>
+    <div style="margin-bottom: 1em;">
+        <?php if ($page > 1): ?>
+            <a href="?page=<?php echo $page - 1; ?>"><button>Previous</button></a>
+        <?php else: ?>
+            <button disabled>Previous</button>
+        <?php endif; ?>
+        <span>Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
+        <?php if ($page < $totalPages): ?>
+            <a href="?page=<?php echo $page + 1; ?>"><button>Next</button></a>
+        <?php else: ?>
+            <button disabled>Next</button>
+        <?php endif; ?>
     </div>
-    <br>
+    <?php endif; ?>
     <form action="/dashboard" method="get" style="display:inline;">
         <button type="submit">Back to Dashboard</button>
     </form>

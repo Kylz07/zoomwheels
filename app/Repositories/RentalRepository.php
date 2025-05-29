@@ -27,6 +27,21 @@ class RentalRepository implements DataRepositoryInterface {
         return $this->database->query("SELECT * FROM rentals WHERE rental_id = ?", [$id]);
     }
 
+    // Use Database.php for paginated reads
+    public function getAllPaginated($page = 1, $itemsPerPage = 10) {
+        $offset = ($page - 1) * $itemsPerPage;
+        // Inject as integers directly (safe, no user input)
+        $sql = "SELECT * FROM rentals LIMIT $itemsPerPage OFFSET $offset";
+        $rentals = $this->database->query($sql);
+        $totalSql = "SELECT COUNT(*) as total FROM rentals";
+        $totalResult = $this->database->query($totalSql);
+        $total = $totalResult[0]['total'] ?? 0;
+        return [
+            'rentals' => $rentals,
+            'total' => $total
+        ];
+    }
+
     // Use DBORM for writes (assuming these work correctly or are preferred)
     public function create($data) {
         $car_brand = $data['car_brand'] ?? null;

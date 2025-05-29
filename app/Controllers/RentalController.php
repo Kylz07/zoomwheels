@@ -23,31 +23,50 @@ class RentalController {
         $this->cookieAuthService = new \App\Services\CookieAuthService($jwtService);
     }
 
-    public function getAllRentals() {
+    private function preparePaginatedRentalsViewData(int $currentPage) {
+        $user = $this->cookieAuthService->getAuthenticatedUser();
+        $itemsPerPage = 10; // This could be a class constant or configurable
+        
+        $result = $this->rentalRepository->getAllPaginated($currentPage, $itemsPerPage);
+        $rentals = $result['rentals'];
+        $total = $result['total'];
+        $totalPages = max(1, ceil($total / $itemsPerPage));
+
+        return [
+            'rentals' => $rentals,
+            'page' => $currentPage,
+            'totalPages' => $totalPages,
+            'user' => $user
+        ];
+    }
+
+        public function getAllRentals() {
         $auth = $this->requireJwtAuthCookieOnly();
         if ($auth) return $auth;
-        $user = $this->cookieAuthService->getAuthenticatedUser();
-        $rentals = $this->rentalRepository->getAll();
+        $user = $this->cookieAuthService->getAuthenticatedUser(); // Get user data
+
+        $page = (int)$this->request->getQueryParam('page', 1);
+        $page = max(1, $page); // Ensure page is at least 1
+        $itemsPerPage = 10;
+
+        $result = $this->rentalRepository->getAllPaginated($page, $itemsPerPage);
+        $rentals = $result['rentals'];
+        $total = $result['total'];
+        $totalPages = max(1, ceil($total / $itemsPerPage));
+
         ob_start();
+        // Pass all necessary variables to the view
         include __DIR__ . '/../Views/rentals/dashboard.php';
         $html = ob_get_clean();
         return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
     }
 
     public function getRentalById($id) {
-        // Only allow numeric IDs
-        if (!is_numeric($id)) {
-            http_response_code(404);
-            echo '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>404 - Page Not Found</h1><p>The page you are looking for does not exist.</p></body></html>';
-            exit;
-        }
         $auth = $this->requireJwtAuth();
         if ($auth) return $auth;
         $rental = $this->rentalRepository->getById($id);
         if (empty($rental)) {
-            http_response_code(404);
-            echo '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>404 - Page Not Found</h1><p>The page you are looking for does not exist.</p></body></html>';
-            exit;
+            return new Response(404, json_encode(['error' => 'Rental not found']));
         }
         return new Response(200, json_encode($rental[0]));
     }
@@ -73,6 +92,27 @@ class RentalController {
         if ($auth) return $auth;
         $this->rentalRepository->delete($id);
         return new Response(204, '');
+    }
+
+    public function showRentalsPage() {
+        $auth = $this->requireJwtAuthCookieOnly();
+        if ($auth) return $auth;
+        $user = $this->cookieAuthService->getAuthenticatedUser(); // Get user data
+
+        $page = (int)$this->request->getQueryParam('page', 1);
+        $page = max(1, $page); // Ensure page is at least 1
+        $itemsPerPage = 10;
+
+        $result = $this->rentalRepository->getAllPaginated($page, $itemsPerPage);
+        $rentals = $result['rentals'];
+        $total = $result['total'];
+        $totalPages = max(1, ceil($total / $itemsPerPage));
+
+        ob_start();
+        // Pass all necessary variables to the view
+        include __DIR__ . '/../Views/rentals/dashboard.php';
+        $html = ob_get_clean();
+        return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
     }
     
     public function showCreateForm() {

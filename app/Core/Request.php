@@ -29,4 +29,8 @@ class Request implements RequestInterface {
         }
         return is_array($data) ? $data : [];
     }
+
+    public function getQueryParam(string $key, $default = null) {
+        return isset($_GET[$key]) ? $_GET[$key] : $default;
+    }
 }
