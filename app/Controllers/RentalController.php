@@ -149,4 +149,71 @@ class RentalController {
         $html = ob_get_clean();
         return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
     }
+
+    public function showEditForm($id) {
+        $auth = $this->requireJwtAuthCookieOnly();
+        if ($auth) return $auth;
+        $error = '';
+        $success = '';
+        $rental = null;
+        $result = $this->rentalRepository->getById($id);
+        if (empty($result)) {
+            $error = 'Rental not found.';
+        } else {
+            $rental = $result[0];
+        }
+        ob_start();
+        include __DIR__ . '/../Views/rentals/edit.php';
+        $html = ob_get_clean();
+        return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    public function processUpdate($id) {
+        $auth = $this->requireJwtAuth();
+        if ($auth) return $auth;
+        $data = $this->request->getBody();
+        $error = '';
+        $success = '';
+        $updateData = [];
+        if (isset($data['car_daily_rate'])) {
+            $updateData['car_daily_rate'] = $data['car_daily_rate'];
+        }
+        if (isset($data['rental_status'])) {
+            $updateData['rental_status'] = $data['rental_status'];
+        }
+        if (empty($updateData)) {
+            $error = 'No valid fields provided for update.';
+        } else {
+            try {
+                // Only attempt update if values are actually different from current
+                $current = $this->rentalRepository->getById($id);
+                if (!empty($current)) {
+                    $currentRental = $current[0];
+                    $changed = false;
+                    foreach ($updateData as $field => $value) {
+                        if (!isset($currentRental[$field]) || $currentRental[$field] != $value) {
+                            $changed = true;
+                            break;
+                        }
+                    }
+                    if ($changed) {
+                        $this->rentalRepository->update($id, $updateData);
+                        $success = 'Rental updated successfully.';
+                    } else {
+                        $success = 'No changes detected.';
+                    }
+                } else {
+                    $error = 'Rental not found.';
+                }
+            } catch (\Exception $e) {
+                $error = $e->getMessage();
+            }
+        }
+        $result = $this->rentalRepository->getById($id);
+        $rental = !empty($result) ? $result[0] : null;
+        ob_start();
+        include __DIR__ . '/../Views/rentals/edit.php';
+        $html = ob_get_clean();
+        return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
 }

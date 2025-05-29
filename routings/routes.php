@@ -31,7 +31,15 @@ return [
     ['method' => 'POST', 'path' => '/rentals/create', 'handler' => function () use ($rentalController) {
         return $rentalController->processCreate();
     }],
-    ['method' => 'GET', 'path' => '/rentals/{id:\d+}', 'handler' => function ($id) use ($rentalController) {
+    // --- Edit routes ---
+    ['method' => 'GET', 'path' => '/rentals/edit/{id}', 'handler' => function ($id) use ($rentalController) {
+        return $rentalController->showEditForm($id);
+    }],
+    ['method' => 'POST', 'path' => '/rentals/edit/{id}', 'handler' => function ($id) use ($rentalController) {
+        return $rentalController->processUpdate($id);
+    }],
+    // --- End Edit routes ---
+    ['method' => 'GET', 'path' => '/rentals/{id}', 'handler' => function ($id) use ($rentalController) {
         return $rentalController->getRentalById($id);
     }],
     ['method' => 'POST', 'path' => '/rentals', 'handler' => function () use ($rentalController) {
@@ -83,10 +91,8 @@ return [
     ['method' => 'GET', 'path' => '', 'handler' => function () use ($authController) {
         return $authController->showLoginForm();
     }],
-    // Catch-all 404 route for undefined paths
-    ['method' => 'GET', 'path' => '/{any}', 'handler' => function () {
-        http_response_code(404);
-        echo '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>404 - Page Not Found</h1><p>The page you are looking for does not exist.</p></body></html>';
-        exit;
+    // Rental dashboard route
+    ['method' => 'GET', 'path' => '/rentals-dashboard', 'handler' => function () use ($rentalController) {
+        return $rentalController->showRentalsPage();
     }],
 ];

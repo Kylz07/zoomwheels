@@ -34,7 +34,11 @@
                         <td><?php echo htmlspecialchars($rental['car_license_plate']); ?></td>
                         <td><?php echo htmlspecialchars($rental['car_daily_rate']); ?></td>
                         <td><?php echo htmlspecialchars($rental['rental_status']); ?></td>
-                        <td><!-- Actions will go here --></td>
+                        <td>
+                            <a href="/rentals/edit/<?php echo htmlspecialchars($rental['rental_id']); ?>">
+                                <button type="button">Edit</button>
+                            </a>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
