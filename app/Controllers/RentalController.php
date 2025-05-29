@@ -158,7 +158,8 @@ class RentalController {
         $rental = null;
         $result = $this->rentalRepository->getById($id);
         if (empty($result)) {
-            $error = 'Rental not found.';
+            // Use the same error response pattern as getRentalById for consistency and testability
+            return new Response(404, 'Rental not found', ['Content-Type' => 'text/plain; charset=UTF-8']);
         } else {
             $rental = $result[0];
         }
