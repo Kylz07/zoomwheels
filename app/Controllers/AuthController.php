@@ -106,8 +106,10 @@ class AuthController {
     }
     
     public function showDashboard() {
-        // This method is deprecated. Redirect to the rentals dashboard instead.
-        return new Response(302, '', ['Location' => '/dashboard']);
+        if (!$this->cookieAuthService->isAuthenticated()) {
+            return $this->redirectToLogin('Can\'t access dashboard. Please log in first');
+        }
+        return new Response(200, '', ['Content-Type' => 'text/html; charset=UTF-8']);
     }
 
     private function redirectToDashboard() {

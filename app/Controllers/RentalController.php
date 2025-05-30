@@ -116,7 +116,9 @@ class RentalController {
         $auth = $this->requireJwtAuthCookieOnly();
         if ($auth) return $auth;
         $user = $this->cookieAuthService->getAuthenticatedUser();
-
+        if (!$user) {
+            return new Response(401, 'Unauthorized', ['Content-Type' => 'text/plain; charset=UTF-8']);
+        }
         $page = (int)$this->request->getQueryParam('page', 1);
         $page = max(1, $page);
         $itemsPerPage = 10;
