@@ -67,9 +67,9 @@ return [
         return $authController->login();
     }],
     
-    // Dashboard route
-    ['method' => 'GET', 'path' => '/dashboard', 'handler' => function () use ($authController) {
-        return $authController->showDashboard();
+    // Dashboard route - now handled by RentalController
+    ['method' => 'GET', 'path' => '/dashboard', 'handler' => function () use ($rentalController) {
+        return $rentalController->showRentalsPage();
     }],
       // Logout route
     ['method' => 'GET', 'path' => '/logout', 'handler' => function () use ($authController) {
@@ -90,10 +90,6 @@ return [
     }],
     ['method' => 'GET', 'path' => '', 'handler' => function () use ($authController) {
         return $authController->showLoginForm();
-    }],
-    // Rental dashboard route
-    ['method' => 'GET', 'path' => '/rentals-dashboard', 'handler' => function () use ($rentalController) {
-        return $rentalController->showRentalsPage();
     }],
     // --- Delete routes ---
     ['method' => 'GET', 'path' => '/rentals/delete/{id}', 'handler' => function ($id) use ($rentalController) {

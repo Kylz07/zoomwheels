@@ -106,15 +106,8 @@ class AuthController {
     }
     
     public function showDashboard() {
-        // Check authentication via JWT cookie only
-        if (!$this->cookieAuthService->isAuthenticated()) {
-            return $this->redirectToLogin('Can\'t access dashboard. Please log in first');
-        }
-        $user = $this->cookieAuthService->getAuthenticatedUser();
-        ob_start();
-        include __DIR__ . '/../Views/users/dashboard.php';
-        $html = ob_get_clean();
-        return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
+        // This method is deprecated. Redirect to the rentals dashboard instead.
+        return new Response(302, '', ['Location' => '/dashboard']);
     }
 
     private function redirectToDashboard() {

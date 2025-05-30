@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Rentals - Zoomwheels</title>
 </head>
 <body>
     <h1>Zoomwheels</h1>
     <p><strong>Welcome, <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>!</strong></p>
-    <form action="/rentals/create" method="get" style="display:inline;">
+    <form action="/rentals/create" method="get" style="display:inline-block;">
         <button type="submit" style="color:white;background-color:green;">+ Create New</button>
     </form>
+    <p style="display:inline-block;"><a href="/logout"><button type="button" style="color:white;background-color:red;">Logout</button></a></p>
     <br><br>
     <form method="get" action="/rentals" style="margin-bottom:1em;">
         <label for="filter_status">Status:</label>
@@ -96,12 +96,5 @@
         <?php endif; ?>
     </div>
     <?php endif; ?>
-    <form action="/dashboard" method="get" style="display:inline;">
-        <button type="submit">Back to Dashboard</button>
-    </form>
-
-    <script>
-        // Client-side filtering logic removed. Filtering and pagination are handled server-side for correctness.
-    </script>
 </body>
 </html>
