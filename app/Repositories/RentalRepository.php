@@ -5,6 +5,7 @@ use App\Core\Interfaces\DataRepositoryInterface;
 use App\Core\Interfaces\iDBFuncs;
 use App\Core\Database;
 use Exception;
+use App\Exceptions\RentalAlreadyExistsException;
 
 class RentalRepository implements DataRepositoryInterface {
     private $db; // DBORM instance
@@ -42,6 +43,34 @@ class RentalRepository implements DataRepositoryInterface {
         ];
     }
 
+    public function getFilteredPaginated($filters, $page = 1, $itemsPerPage = 10) {
+        $where = [];
+        $params = [];
+        if (!empty($filters['status'])) {
+            $where[] = 'rental_status = ?';
+            $params[] = $filters['status'];
+        }
+        if (!empty($filters['brand'])) {
+            $where[] = 'car_brand = ?';
+            $params[] = $filters['brand'];
+        }
+        if (!empty($filters['rate'])) {
+            $where[] = 'car_daily_rate <= ?';
+            $params[] = $filters['rate'];
+        }
+        $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+        $offset = ($page - 1) * $itemsPerPage;
+        $sql = "SELECT * FROM rentals $whereSql LIMIT $itemsPerPage OFFSET $offset";
+        $rentals = $this->database->query($sql, $params);
+        $countSql = "SELECT COUNT(*) as total FROM rentals $whereSql";
+        $totalResult = $this->database->query($countSql, $params);
+        $total = $totalResult[0]['total'] ?? 0;
+        return [
+            'rentals' => $rentals,
+            'total' => $total
+        ];
+    }
+
     // Use DBORM for writes (assuming these work correctly or are preferred)
     public function create($data) {
         $car_brand = $data['car_brand'] ?? null;
@@ -51,6 +80,11 @@ class RentalRepository implements DataRepositoryInterface {
         $rental_status = $data['rental_status'] ?? 'available';        
         
         if ($car_brand && $car_model && $car_license_plate && $car_daily_rate) {
+            // Check for duplicate license plate
+            $existing = $this->database->query("SELECT * FROM rentals WHERE car_license_plate = ? LIMIT 1", [$car_license_plate]);
+            if (!empty($existing)) {
+                throw new RentalAlreadyExistsException("A rental with this license plate already exists.");
+            }
             // This uses the DBORM instance
             return $this->db->table('rentals')->insert([
                 null, $car_brand, $car_model, $car_license_plate, $car_daily_rate, $rental_status
@@ -79,5 +113,10 @@ class RentalRepository implements DataRepositoryInterface {
     public function delete($id) {
         // This uses the DBORM instance
         return $this->db->table('rentals')->where('rental_id', $id)->delete();
+    }
+
+    public function getAllBrands() {
+        $result = $this->database->query("SELECT DISTINCT car_brand FROM rentals ORDER BY car_brand");
+        return array_column($result, 'car_brand');
     }
 }

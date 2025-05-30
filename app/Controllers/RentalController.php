@@ -6,6 +6,7 @@ use App\Core\Interfaces\RequestInterface;
 use App\Core\Response;
 use App\Services\JwtService;
 use App\Exceptions\InvalidCredentialsException;
+use App\Exceptions\RentalAlreadyExistsException;
 use App\Traits\JwtAuthenticationTrait;
 
 class RentalController {
@@ -49,13 +50,30 @@ class RentalController {
         $page = max(1, $page); // Ensure page is at least 1
         $itemsPerPage = 10;
 
-        $result = $this->rentalRepository->getAllPaginated($page, $itemsPerPage);
+        $filters = [
+            'status' => $this->request->getQueryParam('filter_status', ''),
+            'brand' => $this->request->getQueryParam('filter_brand', ''),
+            'rate' => $this->request->getQueryParam('filter_rate', '')
+        ];
+        $hasFilter = !empty($filters['status']) || !empty($filters['brand']) || !empty($filters['rate']);
+        if ($hasFilter) {
+            $result = $this->rentalRepository->getFilteredPaginated($filters, $page, $itemsPerPage);
+        } else {
+            $result = $this->rentalRepository->getAllPaginated($page, $itemsPerPage);
+        }
         $rentals = $result['rentals'];
         $total = $result['total'];
         $totalPages = max(1, ceil($total / $itemsPerPage));
 
+        $brands = $this->rentalRepository->getAllBrands();
+        extract([
+            'rentals' => $rentals,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'user' => $user,
+            'brands' => $brands
+        ]);
         ob_start();
-        // Pass all necessary variables to the view
         include __DIR__ . '/../Views/rentals/dashboard.php';
         $html = ob_get_clean();
         return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
@@ -97,19 +115,36 @@ class RentalController {
     public function showRentalsPage() {
         $auth = $this->requireJwtAuthCookieOnly();
         if ($auth) return $auth;
-        $user = $this->cookieAuthService->getAuthenticatedUser(); // Get user data
+        $user = $this->cookieAuthService->getAuthenticatedUser();
 
         $page = (int)$this->request->getQueryParam('page', 1);
-        $page = max(1, $page); // Ensure page is at least 1
+        $page = max(1, $page);
         $itemsPerPage = 10;
 
-        $result = $this->rentalRepository->getAllPaginated($page, $itemsPerPage);
+        $filters = [
+            'status' => $this->request->getQueryParam('filter_status', ''),
+            'brand' => $this->request->getQueryParam('filter_brand', ''),
+            'rate' => $this->request->getQueryParam('filter_rate', '')
+        ];
+        $hasFilter = !empty($filters['status']) || !empty($filters['brand']) || !empty($filters['rate']);
+        if ($hasFilter) {
+            $result = $this->rentalRepository->getFilteredPaginated($filters, $page, $itemsPerPage);
+        } else {
+            $result = $this->rentalRepository->getAllPaginated($page, $itemsPerPage);
+        }
         $rentals = $result['rentals'];
         $total = $result['total'];
         $totalPages = max(1, ceil($total / $itemsPerPage));
 
+        $brands = $this->rentalRepository->getAllBrands();
+        extract([
+            'rentals' => $rentals,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'user' => $user,
+            'brands' => $brands
+        ]);
         ob_start();
-        // Pass all necessary variables to the view
         include __DIR__ . '/../Views/rentals/dashboard.php';
         $html = ob_get_clean();
         return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
@@ -139,15 +174,14 @@ class RentalController {
             try {
                 $this->rentalRepository->create($data);
                 $success = 'Rental created successfully.';
-                // Clear form data after successful creation by passing empty data to the view
-                // For now, let's clear the data and show the success message on the same page.
-                $data = []; // This will clear the form if the view uses $data to populate fields.
+                $data = [];
+            } catch (RentalAlreadyExistsException $e) {
+                $error = $e->getMessage();
             } catch (\Exception $e) {
                 $error = "Failed to create rental: " . $e->getMessage();
             }
         }
         ob_start();
-        // Pass $success, $error and potentially cleared $data to the view
         include __DIR__ . '/../Views/rentals/create.php';
         $html = ob_get_clean();
         return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
