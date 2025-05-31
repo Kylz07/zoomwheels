@@ -61,7 +61,6 @@ class AuthController {
     }    
     
     public function showLoginForm($error = '', $status = 200) {
-        if (!isset($error)) $error = '';
         ob_start();
         include __DIR__ . '/../Views/users/login.php';
         $html = ob_get_clean();
@@ -70,13 +69,11 @@ class AuthController {
 
     public function login() {
         $data = $this->request->getBody();
-        $error = '';
-        $status = 200;
 
         try {
             $user = $this->authService->login($data);
             $token = $this->jwtService->generateToken($user);
-            // If this is a web form login, redirect to dashboard with cookie
+
             $loginResponse = new Response(302, '', ['Location' => '/dashboard']);
             $loginResponse->addCookie(
                 $this->jwtService->getCookieName(),
@@ -86,15 +83,12 @@ class AuthController {
             return $loginResponse;
         } 
         catch (InvalidCredentialsException $e) {
-            $error = $e->getMessage();
-            $status = 401;
-            return $this->showLoginForm($error, $status);
+            error_log($e->getMessage());
+            return $this->showLoginForm('Invalid username or password.', 401);
         } 
         catch (\Exception $e) {
             error_log('Login error: ' . $e->getMessage());
-            $error = $e->getMessage();
-            $status = 401;
-            return $this->showLoginForm($error, $status);
+            return $this->showLoginForm('Login failed. Please try again.', 400);
         }
     }
 

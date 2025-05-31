@@ -57,17 +57,14 @@ class AuthService {
      * Login a user: validate input, check credentials, return user data or throw exception
      */
     public function login($data) {
-        $username = isset($data['username']) ? trim($data['username']) : '';
-        $password = isset($data['password']) ? $data['password'] : '';
+        $username = trim($data['username'] ?? '');
+        $password = $data['password'] ?? '';
         if (empty($username) || empty($password)) {
             throw new InvalidCredentialsException('Username and password are required.');
         }
         $user = $this->userRepository->findByUsername($username);
         if (!$user || !password_verify($password, $user['password'])) {
             throw new InvalidCredentialsException('Invalid username or password.');
-        }
-        if (!$user) {
-            throw new InvalidCredentialsException('User not found.');
         }
         return $user;
     }
