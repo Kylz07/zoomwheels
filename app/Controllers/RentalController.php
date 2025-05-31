@@ -41,44 +41,6 @@ class RentalController {
         ];
     }
 
-        public function getAllRentals() {
-        $auth = $this->requireJwtAuthCookieOnly();
-        if ($auth) return $auth;
-        $user = $this->cookieAuthService->getAuthenticatedUser(); // Get user data
-
-        $page = (int)$this->request->getQueryParam('page', 1);
-        $page = max(1, $page); // Ensure page is at least 1
-        $itemsPerPage = 10;
-
-        $filters = [
-            'status' => $this->request->getQueryParam('filter_status', ''),
-            'brand' => $this->request->getQueryParam('filter_brand', ''),
-            'rate' => $this->request->getQueryParam('filter_rate', '')
-        ];
-        $hasFilter = !empty($filters['status']) || !empty($filters['brand']) || !empty($filters['rate']);
-        if ($hasFilter) {
-            $result = $this->rentalRepository->getFilteredPaginated($filters, $page, $itemsPerPage);
-        } else {
-            $result = $this->rentalRepository->getAllPaginated($page, $itemsPerPage);
-        }
-        $rentals = $result['rentals'];
-        $total = $result['total'];
-        $totalPages = max(1, ceil($total / $itemsPerPage));
-
-        $brands = $this->rentalRepository->getAllBrands();
-        extract([
-            'rentals' => $rentals,
-            'page' => $page,
-            'totalPages' => $totalPages,
-            'user' => $user,
-            'brands' => $brands
-        ]);
-        ob_start();
-        include __DIR__ . '/../Views/rentals/dashboard.php';
-        $html = ob_get_clean();
-        return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
-    }
-
     public function getRentalById($id) {
         $auth = $this->requireJwtAuth();
         if ($auth) return $auth;

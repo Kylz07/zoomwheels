@@ -73,7 +73,7 @@ class AuthController {
             $user = $this->authService->login($data);
             $token = $this->jwtService->generateToken($user);
 
-            $loginResponse = new Response(302, '', ['Location' => '/dashboard']);
+            $loginResponse = new Response(302, '', ['Location' => '/rentals']);
             $loginResponse->addCookie(
                 $this->jwtService->getCookieName(),
                 $token,

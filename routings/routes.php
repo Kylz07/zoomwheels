@@ -11,19 +11,6 @@ return [
     ['method' => 'GET', 'path' => '/users/{id}', 'handler' => function ($id) use ($controller) {
         return $controller->getUserById($id);
     }],
-    ['method' => 'POST', 'path' => '/users', 'handler' => function () use ($controller) {
-        return $controller->createUser();
-    }],
-    ['method' => 'PUT', 'path' => '/users/{id}', 'handler' => function ($id) use ($controller) {
-        return $controller->updateUser($id);
-    }],
-    ['method' => 'DELETE', 'path' => '/users/{id}', 'handler' => function ($id) use ($controller) {
-        return $controller->deleteUser($id);
-    }],
-    // Rental routes
-    ['method' => 'GET', 'path' => '/rentals', 'handler' => function () use ($rentalController) {
-        return $rentalController->getAllRentals();
-    }],
     // Place /rentals/create routes BEFORE /rentals/{id}
     ['method' => 'GET', 'path' => '/rentals/create', 'handler' => function () use ($rentalController) {
         return $rentalController->showCreateForm();
@@ -68,7 +55,7 @@ return [
     }],
     
     // Dashboard route - now handled by RentalController
-    ['method' => 'GET', 'path' => '/dashboard', 'handler' => function () use ($rentalController) {
+    ['method' => 'GET', 'path' => '/rentals', 'handler' => function () use ($rentalController) {
         return $rentalController->showRentalsPage();
     }],
       // Logout route
