@@ -18,11 +18,11 @@ class AuthService {
      */
     public function register($data) {
         // Validate required fields
-        $username = isset($data['username']) ? trim($data['username']) : '';
-        $password = isset($data['password']) ? $data['password'] : '';
-        $confirm_password = isset($data['confirm_password']) ? $data['confirm_password'] : '';
-        $first_name = isset($data['first_name']) ? trim($data['first_name']) : '';
-        $last_name = isset($data['last_name']) ? trim($data['last_name']) : '';
+        $username = trim($data['username']) ?? '';
+        $password = $data['password'] ?? '';
+        $confirm_password = $data['confirm_password'] ?? '';
+        $first_name = trim($data['first_name']) ?? '';
+        $last_name = trim($data['last_name']) ?? '';
 
         if (!$username || !$password || !$confirm_password || !$first_name || !$last_name) {
             throw new \Exception('Please fill in all required fields.');
@@ -34,23 +34,15 @@ class AuthService {
             throw new \Exception('Passwords do not match.');
         }
 
-        // Hash password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        // Attempt to create user (UserRepository will check for duplicates)
-        try {
-            $this->userRepository->create([
-                'username' => $username,
-                'password' => $hashedPassword,
-                'first_name' => $first_name,
-                'last_name' => $last_name
-            ]);
-        } catch (UserAlreadyExistsException $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            throw $e;
-        }
-        return true;
+        $this->userRepository->create([
+            'username' => $username,
+            'password' => $hashedPassword,
+            'first_name' => $first_name,
+            'last_name' => $last_name
+        ]);
+
     }
 
     /**

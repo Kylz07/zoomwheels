@@ -30,29 +30,28 @@ class AuthController {
     }    
     
     public function showRegisterForm($error = '', $success = '', $status = 200) {
-        if (!isset($error)) $error = '';
-        if (!isset($success)) $success = '';
         ob_start();
         include __DIR__ . '/../Views/users/register.php';
         $html = ob_get_clean();
+
         return new Response($status, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
     }
 
     public function register() {
-        $data = $this->request->getBody();        
-        $error = '';
-        $success = '';
-        $status = 200;
+        $data = $this->request->getBody();    
+
         try {
             $this->authService->register($data);
             $success = 'Registration successful! You can now log in';
             $status = 201;
             return $this->showRegisterForm('', $success, $status);
-        } catch (UserAlreadyExistsException $e) {
+        } 
+        catch (UserAlreadyExistsException $e) {
             $error = $e->getMessage();
             $status = 409;
             return $this->showRegisterForm($error, '', $status);
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) {
             error_log('Registration error: ' . $e->getMessage());
             $error = $e->getMessage();
             $status = 400;

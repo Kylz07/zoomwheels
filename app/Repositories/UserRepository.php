@@ -25,32 +25,22 @@ class UserRepository implements DataRepositoryInterface {
     }    
     
     public function create($data) {
-        $username = $data['username'] ?? null;
-        $password = $data['password'] ?? null;
-        $first_name = $data['first_name'] ?? null;
-        $last_name = $data['last_name'] ?? null;        
-        
-        if (!$username || !$password || !$first_name || !$last_name) {
-            throw new \Exception("Please fill in all required fields.");
-        }        
-        
-        // Check for duplicate username or existing user (same username, first_name, last_name)
+        $username = $data['username'];
+        $password = $data['password'];
+        $first_name = $data['first_name'];
+        $last_name = $data['last_name'];
+
         $existingUser = $this->findByUsername($username);
         if ($existingUser) {
-            if ($existingUser['first_name'] === $first_name && $existingUser['last_name'] === $last_name) {
-                throw new UserAlreadyExistsException("User already exists.");
-            } 
-            else {
-                throw new UserAlreadyExistsException("Username already exists.");
-            }
+            $isSameName = $existingUser['first_name'] === $first_name && $existingUser['last_name'] === $last_name;
+            $message = $isSameName ? "User already exists." : "Username already exists.";
+            throw new UserAlreadyExistsException($message);
         }
 
-        // Insert new user
         $result = $this->db->table('users')->insert([
             null, $username, $password, $first_name, $last_name
         ]);
         
-        // If result is 0, it might also indicate an error (no rows affected)
         if ($result === 0) {
             throw new \Exception("Failed to create user.");
         }
