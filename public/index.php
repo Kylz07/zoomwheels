@@ -59,8 +59,32 @@ foreach ($routes as $route) {
     $router->addRoute($route['method'], $route['path'], $route['handler']);
 }
 
-// Dispatch the request
-$response = $router->dispatch();
+try {
+    $response = $router->dispatch();
+} catch (App\Exceptions\WebAuthenticationRequiredException $e) {
+    // For web authentication failures, redirect to login with error in URL
+    $encodedMessage = urlencode($e->getMessage());
+    header('Location: /login?error=' . $encodedMessage);
+    exit;
+} catch (\Exception $e) {
+    // Log unexpected errors
+    error_log("Unhandled Exception: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+    
+    // Return appropriate error response
+    if (!headers_sent()) {
+        $errorResponse = new App\Core\Response(
+            500, 
+            'An unexpected error occurred. Please try again later.',
+            ['Content-Type' => 'text/plain; charset=UTF-8']
+        );
+        $errorResponse->send();
+    } else {
+        echo 'An unexpected error occurred. Please try again later.';
+    }
+    exit;
+}
 
-// Send the response using the new send() method
-$response->send();
+// Send successful response
+if (isset($response) && $response instanceof App\Core\Response) {
+    $response->send();
+}

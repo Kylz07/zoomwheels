@@ -24,6 +24,10 @@ class RentalController {
         $this->cookieAuthService = new \App\Services\CookieAuthService($jwtService);
     }
 
+    protected function getRequest() {
+        return $this->request;
+    }
+
     private function preparePaginatedRentalsViewData(int $currentPage) {
         $user = $this->cookieAuthService->getAuthenticatedUser();
         $itemsPerPage = 10; // This could be a class constant or configurable
@@ -50,37 +54,12 @@ class RentalController {
         }
         return new Response(200, json_encode($rental[0]));
     }
-    
-    public function createRental() {
-        $auth = $this->requireJwtAuth();
-        if ($auth) return $auth;
-        $data = $this->request->getBody();
-        $this->rentalRepository->create($data);
-        return new Response(201, json_encode(['message' => 'Rental created']));
-    }
-
-    public function updateRental($id) {
-        $auth = $this->requireJwtAuth();
-        if ($auth) return $auth;
-        $data = $this->request->getBody();
-        $this->rentalRepository->update($id, $data);
-        return new Response(200, json_encode(['message' => 'Rental updated']));
-    }
-
-    public function deleteRental($id) {
-        $auth = $this->requireJwtAuth();
-        if ($auth) return $auth;
-        $this->rentalRepository->delete($id);
-        return new Response(204, '');
-    }
 
     public function showRentalsPage() {
         $auth = $this->requireJwtAuthCookieOnly();
         if ($auth) return $auth;
         $user = $this->cookieAuthService->getAuthenticatedUser();
-        if (!$user) {
-            return new Response(401, 'Unauthorized', ['Content-Type' => 'text/plain; charset=UTF-8']);
-        }
+        
         $page = (int)$this->request->getQueryParam('page', 1);
         $page = max(1, $page);
         $itemsPerPage = 10;

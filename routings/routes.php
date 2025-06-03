@@ -29,15 +29,6 @@ return [
     ['method' => 'GET', 'path' => '/rentals/{id}', 'handler' => function ($id) use ($rentalController) {
         return $rentalController->getRentalById($id);
     }],
-    ['method' => 'POST', 'path' => '/rentals', 'handler' => function () use ($rentalController) {
-        return $rentalController->createRental();
-    }],
-    ['method' => 'PUT', 'path' => '/rentals/{id}', 'handler' => function ($id) use ($rentalController) {
-        return $rentalController->updateRental($id);
-    }],
-    ['method' => 'DELETE', 'path' => '/rentals/{id}', 'handler' => function ($id) use ($rentalController) {
-        return $rentalController->deleteRental($id);
-    }],
     // Registration routes
     ['method' => 'GET', 'path' => '/register', 'handler' => function () use ($authController) {
         return $authController->showRegisterForm();

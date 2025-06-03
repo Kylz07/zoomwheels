@@ -21,6 +21,10 @@ class UserController {
         $this->jwtService = $jwtService;
     }
 
+    protected function getRequest() {
+        return $this->request;
+    }
+
     public function getAllUsers() {
         $auth = $this->requireJwtAuth();
         if ($auth) return $auth;

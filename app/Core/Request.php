@@ -33,4 +33,38 @@ class Request implements RequestInterface {
     public function getQueryParam(string $key, $default = null) {
         return isset($_GET[$key]) ? $_GET[$key] : $default;
     }
+
+    public function isApiRequest() {
+        // Check Accept header for JSON preference
+        $acceptHeader = $this->getHeader('Accept') ?? '';
+        if (strpos($acceptHeader, 'application/json') !== false) {
+            return true;
+        }
+        
+        // Check if Authorization header is present (typical for API)
+        if ($this->getHeader('Authorization')) {
+            return true;
+        }
+
+            // Check User-Agent for typical API clients
+        $userAgent = $this->getHeader('User-Agent') ?? '';
+        $apiUserAgents = ['curl', 'postman', 'insomnia', 'httpie', 'python-requests'];
+        
+        foreach ($apiUserAgents as $agent) {
+            if (stripos($userAgent, $agent) !== false) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    public function isWebRequest() {
+        return !$this->isApiRequest();
+    }
+
+    private function getHeader($name) {
+        $headers = getallheaders();
+        return $headers[$name] ?? null;
+    }
 }

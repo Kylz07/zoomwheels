@@ -28,6 +28,10 @@ class AuthController {
         $this->jwtService = new JwtService($userRepository);
         $this->cookieAuthService = new CookieAuthService($this->jwtService, null); // SessionService removed
     }    
+
+    protected function getRequest() {
+        return $this->request;
+    }
     
     public function showRegisterForm($error = '', $success = '', $status = 200) {
         ob_start();
@@ -60,6 +64,11 @@ class AuthController {
     }    
     
     public function showLoginForm($error = '', $status = 200) {
+        $urlError = $this->request->getQueryParam('error');
+        if ($urlError && empty($error)) {
+            $error = urldecode($urlError);
+        }
+
         ob_start();
         include __DIR__ . '/../Views/users/login.php';
         $html = ob_get_clean();
