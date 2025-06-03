@@ -107,21 +107,6 @@ class AuthController {
         return $logoutResponse;
     }
     
-    public function showDashboard() {
-        if (!$this->cookieAuthService->isAuthenticated()) {
-            return $this->redirectToLogin('Can\'t access dashboard. Please log in first');
-        }
-        return new Response(200, '', ['Content-Type' => 'text/html; charset=UTF-8']);
-    }
-
-    private function redirectToDashboard() {
-        return $this->showDashboard();
-    }
-
-    private function redirectToLogin($message = '') {
-        return $this->showLoginForm($message, 401);
-    }    
-    
     public function requireAuth() {
         // Use cookie-only JWT auth for web routes
         $auth = $this->requireJwtAuthCookieOnly();

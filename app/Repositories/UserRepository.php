@@ -3,26 +3,30 @@ namespace App\Repositories;
 
 use App\Core\Interfaces\DataRepositoryInterface;
 use App\Core\Interfaces\iDBFuncs;
+use App\Core\Database;
+use Exception;
 use App\Exceptions\UserAlreadyExistsException;
 
 class UserRepository implements DataRepositoryInterface {
     private $db;
+    private $database; // Not used in this class, but can be useful for raw queries
 
-    public function __construct(iDBFuncs $db) {
+    public function __construct(iDBFuncs $db, Database $database) {
         $this->db = $db;
-    }    public function getAll() {
-        // DBORM has a bug with _runGetQuery and namespaced classes
-        // As a workaround, we'll return an empty array for now
-        // This needs to be fixed in DBORM or use raw SQL
-        return [];
+        $this->database = $database;
+    }    
+    
+    public function getAll() {
+        return $this->database->query("SELECT * FROM users");
     }
 
     public function getById($id) {
-        // DBORM has a bug with _runGetQuery and namespaced classes
-        // As a workaround, we'll return an empty array for now
-        // This needs to be fixed in DBORM or use raw SQL
-        return [];
+        return $this->database->query("SELECT * FROM users WHERE user_id = ?", [$id]);
     }    
+
+    public function delete($id) {
+        return $this->db->table('users')->where('user_id', $id)->delete();
+    }
     
     public function create($data) {
         $username = $data['username'];
@@ -61,21 +65,12 @@ class UserRepository implements DataRepositoryInterface {
         else {
             throw new Exception("No valid fields provided for update.");
         }
-    }
-
-    public function delete($id) {
-        return $this->db->table('users')->where('user_id', $id)->delete();
     }    
     
     public function findByUsername($username) {
-        // Since DBORM has a bug with _runGetQuery and namespaced classes,
-        // we'll use a workaround with raw SQL through a new DBORM instance
         try {
-            $pdo = new \PDO('mysql:host=localhost;dbname=zoomwheels','root','lingco.0576');
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? LIMIT 1");
-            $stmt->execute([$username]);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-            return $result ? $result : null;
+            $result = $this->database->query("SELECT * FROM users WHERE username = ? LIMIT 1", [$username]);
+            return !empty($result) ? $result[0] : null;
         } catch (\PDOException $e) {
             error_log('Database error in findByUsername: ' . $e->getMessage());
             return null;

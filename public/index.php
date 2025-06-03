@@ -29,17 +29,16 @@ $dborm = new DBORM($dbormDsn, $dbUser, $dbPass);
 // Initialize the Database connection for direct queries
 $database = new Database($dbHost, $dbUser, $dbPass, $dbName);
 
-// Initialize the user repository with DBORM
-$userRepository = new UserRepository($dborm);
-
 // Initialize the request object
 $request = new Request();
+
+// Initialize the user controller with dependencies
+$userRepository = new UserRepository($dborm, $database);
 
 // Initialize JWT service (shared across controllers)
 $jwtService = new JwtService($userRepository);
 
-// Initialize the user controller with dependencies
-$controller = new UserController($userRepository, $request, $jwtService);
+$userController = new UserController($userRepository, $request, $jwtService);
 
 // Initialize the rental repository and controller
 $rentalRepository = new RentalRepository($dborm, $database); // Updated: Pass both DBORM and Database instances

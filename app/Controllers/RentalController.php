@@ -59,7 +59,7 @@ class RentalController {
         $auth = $this->requireJwtAuthCookieOnly();
         if ($auth) return $auth;
         $user = $this->cookieAuthService->getAuthenticatedUser();
-        
+
         $page = (int)$this->request->getQueryParam('page', 1);
         $page = max(1, $page);
         $itemsPerPage = 10;
@@ -69,12 +69,14 @@ class RentalController {
             'brand' => $this->request->getQueryParam('filter_brand', ''),
             'rate' => $this->request->getQueryParam('filter_rate', '')
         ];
+
         $hasFilter = !empty($filters['status']) || !empty($filters['brand']) || !empty($filters['rate']);
         if ($hasFilter) {
             $result = $this->rentalRepository->getFilteredPaginated($filters, $page, $itemsPerPage);
         } else {
             $result = $this->rentalRepository->getAllPaginated($page, $itemsPerPage);
         }
+        
         $rentals = $result['rentals'];
         $total = $result['total'];
         $totalPages = max(1, ceil($total / $itemsPerPage));

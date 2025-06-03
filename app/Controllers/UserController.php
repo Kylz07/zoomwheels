@@ -39,20 +39,7 @@ class UserController {
         }
         return new Response(200, json_encode($user[0]));
     }
-    public function createUser() {
-        $auth = $this->requireJwtAuth();
-        if ($auth) return $auth;
-        $data = $this->request->getBody();
-        $this->userRepository->create($data);
-        return new Response(201, json_encode(['message' => 'User created']));
-    }
-    public function updateUser($id) {
-        $auth = $this->requireJwtAuth();
-        if ($auth) return $auth;
-        $data = $this->request->getBody();
-        $this->userRepository->update($id, $data);
-        return new Response(200, json_encode(['message' => 'User updated']));
-    }
+    
     public function deleteUser($id) {
         $auth = $this->requireJwtAuth();
         if ($auth) return $auth;
