@@ -10,7 +10,7 @@
     <?php if (!empty($error)): ?>
         <p style="color:red;"><strong><?php echo htmlspecialchars($error); ?></strong></p>
     <?php endif; ?>
-    <?php if (!empty($rental)): ?>
+    <?php if (!empty($rental) && empty($error)): ?>
         <p>Are you sure you want to delete the following rental record?</p>
         <form action="/rentals/delete/<?php echo htmlspecialchars($rental['rental_id']); ?>" method="post">
             <label for="car_brand">Car Brand:</label>
@@ -26,6 +26,8 @@
             <button type="submit" style="color:white;background-color:red;">Confirm Delete</button>
             <a href="/rentals" style="margin-left:10px;"><button type="button">Cancel</button></a>
         </form>
+    <?php elseif (!empty($error)): ?>
+        <p>Unable to display rental details for deletion.</p>
     <?php else: ?>
         <p>Rental not found.</p>
     <?php endif; ?>

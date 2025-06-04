@@ -1,11 +1,11 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\Interfaces\DataRepositoryInterface;
+use App\Repositories\RentalRepository;
 use App\Core\Interfaces\RequestInterface;
 use App\Core\Response;
 use App\Services\JwtService;
-use App\Services\CookieAuthService; // Added
+use App\Services\CookieAuthService;
 use App\Services\RentalService;
 use App\Exceptions\InvalidCredentialsException;
 use App\Exceptions\RentalAlreadyExistsException;
@@ -20,7 +20,7 @@ class RentalController {
     private $cookieAuthService;
     private $rentalService; // Add service dependency
 
-    public function __construct(DataRepositoryInterface $rentalRepository, RequestInterface $request, JwtService $jwtService, CookieAuthService $cookieAuthService, RentalService $rentalService) {
+    public function __construct(RentalRepository $rentalRepository, RequestInterface $request, JwtService $jwtService, CookieAuthService $cookieAuthService, RentalService $rentalService) {
         $this->rentalRepository = $rentalRepository;
         $this->request = $request;        
         $this->jwtService = $jwtService;
@@ -32,27 +32,10 @@ class RentalController {
         return $this->request;
     }
 
-    private function preparePaginatedRentalsViewData(int $currentPage) {
-        $user = $this->cookieAuthService->getAuthenticatedUser();
-        $itemsPerPage = 10; 
-        
-        $result = $this->rentalRepository->getAllPaginated($currentPage, $itemsPerPage);
-        $rentals = $result['rentals'];
-        $total = $result['total'];
-        $totalPages = max(1, ceil($total / $itemsPerPage));
-
-        return [
-            'rentals' => $rentals,
-            'page' => $currentPage,
-            'totalPages' => $totalPages,
-            'user' => $user
-        ];
-    }
-
     public function getRentalById($id) {
         $auth = $this->requireJwtAuth();
         if ($auth) return $auth;
-        $rental = $this->rentalRepository->getById($id);
+        $rental = $this->rentalService->getRentalById($id);
         if (empty($rental)) {
             return new Response(404, json_encode(['error' => 'Rental not found']));
         }
@@ -125,17 +108,15 @@ class RentalController {
     }
 
     public function showEditForm($id) {
-        $auth = $this->requireJwtAuthCookieOnly();
+        $auth = $this->requireJwtAuth();
         if ($auth) return $auth;
         $error = '';
         $success = '';
         $rental = null;
-        $result = $this->rentalRepository->getById($id);
-        if (empty($result)) {
-            // Use the same error response pattern as getRentalById for consistency and testability
+        $rental = $this->rentalService->getRentalById($id);
+
+        if (!$rental) {
             return new Response(404, 'Rental not found', ['Content-Type' => 'text/plain; charset=UTF-8']);
-        } else {
-            $rental = $result[0];
         }
         ob_start();
         include __DIR__ . '/../Views/rentals/edit.php';
@@ -149,43 +130,15 @@ class RentalController {
         $data = $this->request->getBody();
         $error = '';
         $success = '';
-        $updateData = [];
-        if (isset($data['car_daily_rate'])) {
-            $updateData['car_daily_rate'] = $data['car_daily_rate'];
+        $rental = null;
+
+        try {
+            $success = $this->rentalService->updateRental($id, $data);
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
         }
-        if (isset($data['rental_status'])) {
-            $updateData['rental_status'] = $data['rental_status'];
-        }
-        if (empty($updateData)) {
-            $error = 'No valid fields provided for update.';
-        } else {
-            try {
-                // Only attempt update if values are actually different from current
-                $current = $this->rentalRepository->getById($id);
-                if (!empty($current)) {
-                    $currentRental = $current[0];
-                    $changed = false;
-                    foreach ($updateData as $field => $value) {
-                        if (!isset($currentRental[$field]) || $currentRental[$field] != $value) {
-                            $changed = true;
-                            break;
-                        }
-                    }
-                    if ($changed) {
-                        $this->rentalRepository->update($id, $updateData);
-                        $success = 'Rental updated successfully.';
-                    } else {
-                        $success = 'No changes detected.';
-                    }
-                } else {
-                    $error = 'Rental not found.';
-                }
-            } catch (\Exception $e) {
-                $error = $e->getMessage();
-            }
-        }
-        $result = $this->rentalRepository->getById($id);
-        $rental = !empty($result) ? $result[0] : null;
+        $rental = $this->rentalService->getRentalById($id);
+
         ob_start();
         include __DIR__ . '/../Views/rentals/edit.php';
         $html = ob_get_clean();
@@ -195,14 +148,18 @@ class RentalController {
     public function showDeleteForm($id) {
         $auth = $this->requireJwtAuthCookieOnly();
         if ($auth) return $auth;
+
         $error = '';
         $rental = null;
-        $result = $this->rentalRepository->getById($id);
-        if (empty($result)) {
-            return new Response(404, 'Rental not found', ['Content-Type' => 'text/plain; charset=UTF-8']);
-        } else {
-            $rental = $result[0];
+        try {
+            $rental = $this->rentalService->getRentalById($id);
+            if (!$rental) {
+                $error = 'Rental not found.';
+            }
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
         }
+
         ob_start();
         include __DIR__ . '/../Views/rentals/delete.php';
         $html = ob_get_clean();
@@ -210,23 +167,39 @@ class RentalController {
     }
 
     public function processDelete($id) {
-        $auth = $this->requireJwtAuth();
+        $auth = $this->requireJwtAuthCookieOnly();
         if ($auth) return $auth;
+
         $error = '';
-        $result = $this->rentalRepository->getById($id);
-        if (empty($result)) {
-            return new Response(404, 'Rental not found', ['Content-Type' => 'text/plain; charset=UTF-8']);
-        }
+        $rental = null;
         try {
-            $this->rentalRepository->delete($id); // Hard delete
+            $this->rentalService->deleteRental($id);
             return new Response(302, '', ['Location' => '/rentals']);
         } catch (\Exception $e) {
             $error = $e->getMessage();
-            $rental = $result[0];
-            ob_start();
-            include __DIR__ . '/../Views/rentals/delete.php';
-            $html = ob_get_clean();
-            return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
+            // Try to fetch the rental again for the view (may be null)
+            $rental = $this->rentalService->getRentalById($id);
         }
+        ob_start();
+        include __DIR__ . '/../Views/rentals/delete.php';
+        $html = ob_get_clean();
+        return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    private function preparePaginatedRentalsViewData(int $currentPage) {
+        $user = $this->cookieAuthService->getAuthenticatedUser();
+        $itemsPerPage = 10; 
+        
+        $result = $this->rentalRepository->getAllPaginated($currentPage, $itemsPerPage);
+        $rentals = $result['rentals'];
+        $total = $result['total'];
+        $totalPages = max(1, ceil($total / $itemsPerPage));
+
+        return [
+            'rentals' => $rentals,
+            'page' => $currentPage,
+            'totalPages' => $totalPages,
+            'user' => $user
+        ];
     }
 }

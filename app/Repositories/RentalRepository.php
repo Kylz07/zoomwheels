@@ -24,7 +24,35 @@ class RentalRepository implements DataRepositoryInterface {
         return $this->database->query("SELECT * FROM rentals WHERE rental_id = ?", [$id]);
     }
 
-    // Use Database.php for paginated reads
+    public function create($data) {
+        $car_brand = $data['car_brand'];
+        $car_model = $data['car_model'];
+        $car_license_plate = $data['car_license_plate'];
+        $car_daily_rate = $data['car_daily_rate'];
+        $rental_status = $data['rental_status'] ?? 'available';
+
+        return $this->db->table('rentals')->insert([
+            null, $car_brand, $car_model, $car_license_plate, $car_daily_rate, $rental_status
+        ]);
+    }
+
+    public function update($id, $data) {
+        return $this->db->table('rentals')->where('rental_id', $id)->update($data);
+    }
+
+    public function delete($id) {
+        return $this->db->table('rentals')->where('rental_id', $id)->delete();
+    }
+
+    public function getAllBrands() {
+        $result = $this->database->query("SELECT DISTINCT car_brand FROM rentals ORDER BY car_brand");
+        return array_column($result, 'car_brand');
+    }
+
+    public function getByLicensePlate($licensePlate) {
+        return $this->database->query("SELECT * FROM rentals WHERE car_license_plate = ? LIMIT 1", [$licensePlate]);
+    }
+
     public function getAllPaginated($page = 1, $itemsPerPage = 10) {
         $offset = ($page - 1) * $itemsPerPage;
         // Inject as integers directly (safe, no user input)
@@ -65,48 +93,5 @@ class RentalRepository implements DataRepositoryInterface {
             'rentals' => $rentals,
             'total' => $total
         ];
-    }
-
-    public function create($data) {
-        // Only insert, no validation or domain logic
-        $car_brand = $data['car_brand'];
-        $car_model = $data['car_model'];
-        $car_license_plate = $data['car_license_plate'];
-        $car_daily_rate = $data['car_daily_rate'];
-        $rental_status = $data['rental_status'] ?? 'available';
-        // This uses the DBORM instance
-        return $this->db->table('rentals')->insert([
-            null, $car_brand, $car_model, $car_license_plate, $car_daily_rate, $rental_status
-        ]);
-    }
-
-    public function getByLicensePlate($licensePlate) {
-        return $this->database->query("SELECT * FROM rentals WHERE car_license_plate = ? LIMIT 1", [$licensePlate]);
-    }
-
-    public function update($id, $data) {
-        $fields = [];
-        if (isset($data['car_brand'])) $fields['car_brand'] = $data['car_brand'];
-        if (isset($data['car_model'])) $fields['car_model'] = $data['car_model'];
-        if (isset($data['car_license_plate'])) $fields['car_license_plate'] = $data['car_license_plate'];
-        if (isset($data['car_daily_rate'])) $fields['car_daily_rate'] = $data['car_daily_rate'];
-        if (isset($data['rental_status'])) $fields['rental_status'] = $data['rental_status'];
-        
-        if (count($fields) > 0) {
-            // This uses the DBORM instance
-            return $this->db->table('rentals')->where('rental_id', $id)->update($fields);
-        } else {
-            throw new Exception("No valid fields provided for update.");
-        }
-    }
-
-    public function delete($id) {
-        // This uses the DBORM instance
-        return $this->db->table('rentals')->where('rental_id', $id)->delete();
-    }
-
-    public function getAllBrands() {
-        $result = $this->database->query("SELECT DISTINCT car_brand FROM rentals ORDER BY car_brand");
-        return array_column($result, 'car_brand');
     }
 }

@@ -17,7 +17,8 @@ class UserController {
     private $jwtService;
 
     public function __construct(DataRepositoryInterface $userRepository, RequestInterface $request, JwtService $jwtService) {
-        $this->userRepository = $userRepository;        $this->request = $request;
+        $this->userRepository = $userRepository;        
+        $this->request = $request;
         $this->jwtService = $jwtService;
     }
 
