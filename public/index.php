@@ -3,18 +3,21 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\DBORM;
-use App\Core\Database; // Added: Import the Database class
+use App\Core\Database;
+use App\Core\Request;
+use App\Core\Response;
+use App\Core\Router;
+use App\Core\RouteMatcher;
 use App\Repositories\UserRepository;
 use App\Repositories\RentalRepository;
-use App\Core\Request;
 use App\Controllers\UserController;
 use App\Controllers\RentalController;
 use App\Controllers\AuthController;
 use App\Services\JwtService;
 use App\Services\AuthService; 
 use App\Services\CookieAuthService; 
-use App\Core\Router;
-use App\Core\RouteMatcher;
+use App\Exceptions\WebAuthenticationRequiredException;
+
 
 
 
@@ -68,7 +71,7 @@ foreach ($routes as $route) {
 
 try {
     $response = $router->dispatch();
-} catch (App\Exceptions\WebAuthenticationRequiredException $e) {
+} catch (WebAuthenticationRequiredException $e) {
     // For web authentication failures, redirect to login with error in URL
     $encodedMessage = urlencode($e->getMessage());
     header('Location: /login?error=' . $encodedMessage);
@@ -79,7 +82,7 @@ try {
     
     // Return appropriate error response
     if (!headers_sent()) {
-        $errorResponse = new App\Core\Response(
+        $errorResponse = new Response(
             500, 
             'An unexpected error occurred. Please try again later.',
             ['Content-Type' => 'text/plain; charset=UTF-8']
@@ -92,6 +95,6 @@ try {
 }
 
 // Send successful response
-if (isset($response) && $response instanceof App\Core\Response) {
+if (isset($response) && $response instanceof Response) {
     $response->send();
 }
