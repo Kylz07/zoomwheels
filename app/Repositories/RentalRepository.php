@@ -68,25 +68,20 @@ class RentalRepository implements DataRepositoryInterface {
     }
 
     public function create($data) {
-        $car_brand = $data['car_brand'] ?? null;
-        $car_model = $data['car_model'] ?? null;
-        $car_license_plate = $data['car_license_plate'] ?? null;
-        $car_daily_rate = $data['car_daily_rate'] ?? null;
-        $rental_status = $data['rental_status'] ?? 'available';        
-        
-        if ($car_brand && $car_model && $car_license_plate && $car_daily_rate) {
-            // Check for duplicate license plate
-            $existing = $this->database->query("SELECT * FROM rentals WHERE car_license_plate = ? LIMIT 1", [$car_license_plate]);
-            if (!empty($existing)) {
-                throw new RentalAlreadyExistsException("A rental with this license plate already exists.");
-            }
-            // This uses the DBORM instance
-            return $this->db->table('rentals')->insert([
-                null, $car_brand, $car_model, $car_license_plate, $car_daily_rate, $rental_status
-            ]);
-        } else {
-            throw new Exception("Missing required fields for rental creation.");
-        }
+        // Only insert, no validation or domain logic
+        $car_brand = $data['car_brand'];
+        $car_model = $data['car_model'];
+        $car_license_plate = $data['car_license_plate'];
+        $car_daily_rate = $data['car_daily_rate'];
+        $rental_status = $data['rental_status'] ?? 'available';
+        // This uses the DBORM instance
+        return $this->db->table('rentals')->insert([
+            null, $car_brand, $car_model, $car_license_plate, $car_daily_rate, $rental_status
+        ]);
+    }
+
+    public function getByLicensePlate($licensePlate) {
+        return $this->database->query("SELECT * FROM rentals WHERE car_license_plate = ? LIMIT 1", [$licensePlate]);
     }
 
     public function update($id, $data) {

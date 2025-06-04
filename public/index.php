@@ -16,6 +16,7 @@ use App\Controllers\AuthController;
 use App\Services\JwtService;
 use App\Services\AuthService; 
 use App\Services\CookieAuthService; 
+use App\Services\RentalService;
 use App\Exceptions\WebAuthenticationRequiredException;
 
 
@@ -49,8 +50,9 @@ $cookieAuthService = new CookieAuthService($jwtService, null); // Assuming Sessi
 $userController = new UserController($userRepository, $request, $jwtService);
 
 // Initialize the rental repository and controller
-$rentalRepository = new RentalRepository($dborm, $database); // Updated: Pass both DBORM and Database instances
-$rentalController = new RentalController($rentalRepository, $request, $jwtService, $cookieAuthService); // Added cookieAuthService
+$rentalRepository = new RentalRepository($dborm, $database);
+$rentalService = new RentalService($rentalRepository);
+$rentalController = new RentalController($rentalRepository, $request, $jwtService, $cookieAuthService, $rentalService); // Added rentalService
 
 // Initialize services for AuthController
 $authService = new AuthService($userRepository);

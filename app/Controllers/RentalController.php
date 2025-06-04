@@ -6,6 +6,7 @@ use App\Core\Interfaces\RequestInterface;
 use App\Core\Response;
 use App\Services\JwtService;
 use App\Services\CookieAuthService; // Added
+use App\Services\RentalService;
 use App\Exceptions\InvalidCredentialsException;
 use App\Exceptions\RentalAlreadyExistsException;
 use App\Traits\JwtAuthenticationTrait;
@@ -17,12 +18,14 @@ class RentalController {
     private $request;
     private $jwtService;
     private $cookieAuthService;
+    private $rentalService; // Add service dependency
 
-    public function __construct(DataRepositoryInterface $rentalRepository, RequestInterface $request, JwtService $jwtService, CookieAuthService $cookieAuthService) {
+    public function __construct(DataRepositoryInterface $rentalRepository, RequestInterface $request, JwtService $jwtService, CookieAuthService $cookieAuthService, RentalService $rentalService) {
         $this->rentalRepository = $rentalRepository;
         $this->request = $request;        
         $this->jwtService = $jwtService;
         $this->cookieAuthService = $cookieAuthService;
+        $this->rentalService = $rentalService;
     }
 
     protected function getRequest() {
@@ -96,11 +99,9 @@ class RentalController {
         return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
     }
     
-    public function showCreateForm() {
+    public function showCreateForm($error = '', $success = '', $data = []) {
         $auth = $this->requireJwtAuthCookieOnly();
         if ($auth) return $auth;
-        $error = '';
-        $success = '';
         ob_start();
         include __DIR__ . '/../Views/rentals/create.php';
         $html = ob_get_clean();
@@ -113,24 +114,14 @@ class RentalController {
         $data = $this->request->getBody();
         $error = '';
         $success = '';
-        // Basic validation
-        if (empty($data['car_brand']) || empty($data['car_model']) || empty($data['car_license_plate']) || empty($data['car_daily_rate'])) {
-            $error = 'All fields except status are required.';
-        } else {
-            try {
-                $this->rentalRepository->create($data);
-                $success = 'Rental created successfully.';
-                $data = [];
-            } catch (RentalAlreadyExistsException $e) {
-                $error = $e->getMessage();
-            } catch (\Exception $e) {
-                $error = "Failed to create rental: " . $e->getMessage();
-            }
+        try {
+            $this->rentalService->createRental($data);
+            $success = 'Rental created successfully.';
+            $data = [];
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
         }
-        ob_start();
-        include __DIR__ . '/../Views/rentals/create.php';
-        $html = ob_get_clean();
-        return new Response(200, $html, ['Content-Type' => 'text/html; charset=UTF-8']);
+        return $this->showCreateForm($error, $success, $data);
     }
 
     public function showEditForm($id) {
