@@ -5,11 +5,17 @@ use App\Controllers\AuthController;
 
 return [
     // User routes
-    ['method' => 'GET', 'path' => '/users', 'handler' => function () use ($controller) {
-        return $controller->getAllUsers();
+    ['method' => 'GET', 'path' => '/users', 'handler' => function () use ($userController) {
+        return $userController->getAllUsers();
     }],
-    ['method' => 'GET', 'path' => '/users/{id}', 'handler' => function ($id) use ($controller) {
-        return $controller->getUserById($id);
+    ['method' => 'GET', 'path' => '/users/{id}', 'handler' => function ($id) use ($userController) {
+        return $userController->getUserById($id);
+    }],
+    ['method' => 'DELETE', 'path' => '/users/{id}/delete', 'handler' => function ($id) use ($userController) {
+        return $userController->deleteUser($id);
+    }],
+    ['method' => 'GET', 'path' => '/users/{id}/delete', 'handler' => function ($id) use ($userController) {
+        return $userController->deleteUser($id);
     }],
     // Place /rentals/create routes BEFORE /rentals/{id}
     ['method' => 'GET', 'path' => '/rentals/create', 'handler' => function () use ($rentalController) {

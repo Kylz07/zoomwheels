@@ -5,6 +5,7 @@ use App\Core\Interfaces\DataRepositoryInterface;
 use App\Core\Interfaces\RequestInterface;
 use App\Core\Response;
 use App\Services\JwtService;
+use App\Services\CookieAuthService; // Added
 use App\Exceptions\InvalidCredentialsException;
 use App\Exceptions\RentalAlreadyExistsException;
 use App\Traits\JwtAuthenticationTrait;
@@ -17,11 +18,11 @@ class RentalController {
     private $jwtService;
     private $cookieAuthService;
 
-    public function __construct(DataRepositoryInterface $rentalRepository, RequestInterface $request, JwtService $jwtService) {
+    public function __construct(DataRepositoryInterface $rentalRepository, RequestInterface $request, JwtService $jwtService, CookieAuthService $cookieAuthService) {
         $this->rentalRepository = $rentalRepository;
         $this->request = $request;        
         $this->jwtService = $jwtService;
-        $this->cookieAuthService = new \App\Services\CookieAuthService($jwtService);
+        $this->cookieAuthService = $cookieAuthService;
     }
 
     protected function getRequest() {
@@ -30,7 +31,7 @@ class RentalController {
 
     private function preparePaginatedRentalsViewData(int $currentPage) {
         $user = $this->cookieAuthService->getAuthenticatedUser();
-        $itemsPerPage = 10; // This could be a class constant or configurable
+        $itemsPerPage = 10; 
         
         $result = $this->rentalRepository->getAllPaginated($currentPage, $itemsPerPage);
         $rentals = $result['rentals'];

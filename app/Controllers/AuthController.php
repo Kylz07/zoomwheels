@@ -5,11 +5,11 @@ use App\Core\Interfaces\DataRepositoryInterface;
 use App\Core\Interfaces\RequestInterface;
 use App\Core\Response;
 use App\Repositories\UserRepository;
-use App\Services\AuthService;
 use App\Exceptions\UserAlreadyExistsException;
 use App\Exceptions\InvalidCredentialsException;
 use App\Services\JwtService;
-use App\Services\CookieAuthService;
+use App\Services\CookieAuthService; 
+use App\Services\AuthService;
 use App\Traits\JwtAuthenticationTrait;
 
 class AuthController {
@@ -21,12 +21,12 @@ class AuthController {
     private $authService;
     private $jwtService;
 
-    public function __construct(UserRepository $userRepository, RequestInterface $request) {
+    public function __construct(UserRepository $userRepository, RequestInterface $request, AuthService $authService, JwtService $jwtService, CookieAuthService $cookieAuthService) {
         $this->userRepository = $userRepository;
         $this->request = $request;
-        $this->authService = new AuthService($userRepository);
-        $this->jwtService = new JwtService($userRepository);
-        $this->cookieAuthService = new CookieAuthService($this->jwtService, null); // SessionService removed
+        $this->authService = $authService;
+        $this->jwtService = $jwtService;
+        $this->cookieAuthService = $cookieAuthService;
     }    
 
     protected function getRequest() {

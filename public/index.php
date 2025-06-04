@@ -11,6 +11,8 @@ use App\Controllers\UserController;
 use App\Controllers\RentalController;
 use App\Controllers\AuthController;
 use App\Services\JwtService;
+use App\Services\AuthService; 
+use App\Services\CookieAuthService; 
 use App\Core\Router;
 use App\Core\RouteMatcher;
 
@@ -38,14 +40,20 @@ $userRepository = new UserRepository($dborm, $database);
 // Initialize JWT service (shared across controllers)
 $jwtService = new JwtService($userRepository);
 
+// Initialize CookieAuthService (shared across relevant controllers)
+$cookieAuthService = new CookieAuthService($jwtService, null); // Assuming SessionService is intentionally null
+
 $userController = new UserController($userRepository, $request, $jwtService);
 
 // Initialize the rental repository and controller
 $rentalRepository = new RentalRepository($dborm, $database); // Updated: Pass both DBORM and Database instances
-$rentalController = new RentalController($rentalRepository, $request, $jwtService);
+$rentalController = new RentalController($rentalRepository, $request, $jwtService, $cookieAuthService); // Added cookieAuthService
+
+// Initialize services for AuthController
+$authService = new AuthService($userRepository);
 
 // Initialize the auth controller
-$authController = new AuthController($userRepository, $request);
+$authController = new AuthController($userRepository, $request, $authService, $jwtService, $cookieAuthService);
 
 // Load routes
 $routes = include __DIR__ . '/../routings/routes.php';
